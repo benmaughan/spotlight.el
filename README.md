@@ -28,7 +28,7 @@ original query is launched.
 
 2. `spotlight-ivy` prompts for a query string and searches the
 spotlight database with dynamic updates for each new character
-entered. You`ll be given a list of files that match. Selecting a
+entered. You'll be given a list of files that match. Selecting a
 file will launch `swiper` for that file searching for the query
 string.
 
@@ -42,7 +42,7 @@ and can lead to slow performance.
 Customise the variable `spotlight-base-dir` to specify the base
 directory for the spotlight search for both `spotlight` and
 `spotlight-ivy`. The spotlight database will be queried for files
-below this directory. Default is user`s home directory. Use `/` to
+below this directory. Default is user's home directory. Use `/` to
 search everywhere.
 
 
