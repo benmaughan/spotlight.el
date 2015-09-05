@@ -1,14 +1,12 @@
 ;;; spotlight.el --- search files with Mac OS X spotlight                     -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015  Free Software Foundation, Inc.
+;; Copyright (C) 2015  Ben Maughan <benmaughan@gmail.com>
 
 ;; Author: Ben Maughan <benmaughan@gmail.com>
 ;; URL: http://www.pragmaticemacs.com
-;; Version: 0.1.0
-;; Package-Requires: ((emacs "24.1") (swiper "0.4.0"))
+;; Version: 0.2.0
+;; Package-Requires: ((emacs "24.1") (swiper "0.4.0") (counsel "0.1.0"))
 ;; Keywords: search
-
-;; This file is part of GNU Emacs.
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -42,15 +40,24 @@
 ;;; Code:
 
 (require 'swiper)
+(require 'counsel)
 
 (defgroup spotlight nil
   "Search for files with Mac OS X spotlight."
   :group 'external
   :prefix "spotlight-")
 
-(defcustom spotlight-base-dir "~/"
+(defcustom spotlight-base-dir "~"
   "Search spotlight database for files below this directory. Default is user's home directory. Use '/' to search everywhere."
   :type 'string)
+
+(defcustom spotlight-min-chars 5
+  "Minimum number of characters required before running spotlight
+search in spotlight-ivy. After this many characters have been
+entered, the search is updated with each new character. Setting
+spotlight-min-chars to a lower number will result in more matches
+and can lead to slow performance."
+  :type 'integer)
 
 ;; Function to be called by ivy to filter the spotlight file list
 (defun spotlight-filter (spotlight-ivy-filter-string &rest _unused)
@@ -59,20 +66,25 @@
 
 
 ;; Main function
+;;;###autoload
 (defun spotlight ()
   "Search for a string in the spotlight database.
 You'll be given a list of files that match. Narrow to the
 filename you want by typing text to match the filename and then
 selecting a file will launch `swiper' for that file to search for
-your original query. If file is a pdf, it will be opened but
-swiper will not run."
+your original query."
   (interactive)
 
   ;;prompt for spotlight query
   (setq spotlight-query (read-from-minibuffer "Spotlight query: "))
 
   ;;set up command
-  (setq spotlight-command (format "mdfind -onlyin %s '%s'" spotlight-base-dir spotlight-query))
+  (setq spotlight-command (concat "mdfind -onlyin "
+                                  (shell-quote-argument
+                                   (expand-file-name spotlight-base-dir))
+                                  " "
+                                  spotlight-query))
+
 
   ;; capture to string
   (setq spotlight-result (shell-command-to-string spotlight-command))
@@ -83,15 +95,50 @@ swiper will not run."
   ;;use ivy to narrow
   (let ((ivy-height 20))
     (ivy-read "Filter: " 'spotlight-filter
-            ;;:initial-input initial-input
+              :dynamic-collection t
+              :sort nil
+              :action (lambda (x)
+                        (find-file x)
+                        (swiper spotlight-query)))))
+
+
+;; alternative function with incremental spotlight search but no
+;; filename filter
+
+;; Function to be called by spotlight-ivy
+(defun ivy-mdfind-function (string &rest _unused)
+  "Issue mdfind for STRING."
+  (if (< (length string) spotlight-min-chars)
+      (counsel-more-chars spotlight-min-chars)
+    (counsel--async-command
+     (concat "mdfind -onlyin "
+             (shell-quote-argument
+              (expand-file-name spotlight-base-dir))
+             " "
+             string))
+    nil))
+
+;; Main function
+;;;###autoload
+(defun spotlight-ivy (&optional initial-input)
+  "Search for a string in the spotlight database with dynamic
+updates for each new character entered. You'll be given a list of
+files that match. Selecting a file will launch `swiper' for that
+file. INITIAL-INPUT can be given as the initial minibuffer input.
+
+Customise the variable spotlight-min-chars to set the minimum
+number of characters that must be entered before the first
+spotlight search is performed. Setting spotlight-min-chars to a
+lower number will result in more matches and can lead to slow
+performance."
+  (interactive)
+  (ivy-read "spotlight: " 'ivy-mdfind-function
+            :initial-input initial-input
             :dynamic-collection t
-            :sort nil
             :action (lambda (x)
-                      (when (string-match "\\(^\/.*\\)\\'" x)
-                        (let ((file-name (match-string 1 x)))
-                          (find-file file-name)
-                          (unless (string-match "pdf$" x)
-                            (swiper spotlight-query))))))))
+                        (find-file x)
+                        (swiper ivy-text))))
+
 
 (provide 'spotlight)
 ;;; spotlight.el ends here
