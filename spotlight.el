@@ -84,6 +84,10 @@ spotlight-min-chars to a lower number will result in more matches
 and can lead to slow performance."
   :type 'integer)
 
+(defcustom spotlight-ivy-height 20
+  "Height in characters of minibuffer displaying search results."
+  :type 'integer)
+
 (defvar spotlight-list nil
   "Contains results of spotlight query.")
 
@@ -124,7 +128,7 @@ your original query."
     (setq spotlight-list (split-string spotlight-result "\n"))
 
     ;;use ivy to narrow
-    (let ((ivy-height 20))
+    (let ((ivy-height spotlight-ivy-height))
       (ivy-read "Filter: " 'spotlight-filter
                 :dynamic-collection t
                 :sort nil
@@ -163,12 +167,13 @@ spotlight search is performed. Setting spotlight-min-chars to a
 lower number will result in more matches and can lead to slow
 performance."
   (interactive)
-  (ivy-read "spotlight: " 'ivy-mdfind-function
-            :initial-input initial-input
-            :dynamic-collection t
-            :action (lambda (x)
-                      (find-file x)
-                      (swiper ivy-text))))
+  (let ((ivy-height spotlight-ivy-height))
+    (ivy-read "spotlight: " 'ivy-mdfind-function
+              :initial-input initial-input
+              :dynamic-collection t
+              :action (lambda (x)
+                        (find-file x)
+                        (swiper ivy-text)))))
 
 
 (provide 'spotlight)
