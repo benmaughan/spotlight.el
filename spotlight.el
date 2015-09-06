@@ -6,7 +6,7 @@
 ;; URL: http://www.pragmaticemacs.com
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "24.1") (swiper "0.4.0") (counsel "0.1.0"))
-;; Keywords: search
+;; Keywords: search, external
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
