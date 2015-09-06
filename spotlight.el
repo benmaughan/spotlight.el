@@ -84,6 +84,10 @@ spotlight-min-chars to a lower number will result in more matches
 and can lead to slow performance."
   :type 'integer)
 
+(defvar spotlight-list nil
+  "Contains results of spotlight query.")
+
+
 ;; Function to be called by ivy to filter the spotlight file list
 (defun spotlight-filter (spotlight-ivy-filter-string &rest _unused)
   "Filter spotlight results"
@@ -100,31 +104,33 @@ selecting a file will launch `swiper' for that file to search for
 your original query."
   (interactive)
 
-  ;;prompt for spotlight query
-  (setq spotlight-query (read-from-minibuffer "Spotlight query: "))
 
-  ;;set up command
-  (setq spotlight-command (concat "mdfind -onlyin "
-                                  (shell-quote-argument
-                                   (expand-file-name spotlight-base-dir))
-                                  " "
-                                  spotlight-query))
+  (let (spotlight-query spotlight-command spotlight-result)
+    ;;prompt for spotlight query
+    (setq spotlight-query (read-from-minibuffer "Spotlight query: "))
+
+    ;;set up command
+    (setq spotlight-command (concat "mdfind -onlyin "
+                                    (shell-quote-argument
+                                     (expand-file-name spotlight-base-dir))
+                                    " "
+                                    spotlight-query))
 
 
-  ;; capture to string
-  (setq spotlight-result (shell-command-to-string spotlight-command))
+    ;; capture to string
+    (setq spotlight-result (shell-command-to-string spotlight-command))
 
-  ;; split to list
-  (setq spotlight-list (split-string spotlight-result "\n"))
+    ;; split to list
+    (setq spotlight-list (split-string spotlight-result "\n"))
 
-  ;;use ivy to narrow
-  (let ((ivy-height 20))
-    (ivy-read "Filter: " 'spotlight-filter
-              :dynamic-collection t
-              :sort nil
-              :action (lambda (x)
-                        (find-file x)
-                        (swiper spotlight-query)))))
+    ;;use ivy to narrow
+    (let ((ivy-height 20))
+      (ivy-read "Filter: " 'spotlight-filter
+                :dynamic-collection t
+                :sort nil
+                :action (lambda (x)
+                          (find-file x)
+                          (swiper spotlight-query))))))
 
 
 ;; alternative function with incremental spotlight search but no
@@ -161,8 +167,8 @@ performance."
             :initial-input initial-input
             :dynamic-collection t
             :action (lambda (x)
-                        (find-file x)
-                        (swiper ivy-text))))
+                      (find-file x)
+                      (swiper ivy-text))))
 
 
 (provide 'spotlight)
