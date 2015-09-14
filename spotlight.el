@@ -88,15 +88,10 @@ and can lead to slow performance."
   "Height in characters of minibuffer displaying search results."
   :type 'integer)
 
-(defvar spotlight-list nil
-  "Contains results of spotlight query.")
-
-
 ;; Function to be called by ivy to filter the spotlight file list
-(defun spotlight-filter (spotlight-ivy-filter-string &rest _unused)
-  "Filter spotlight results"
-  (delq nil (mapcar (lambda (x) (and (string-match spotlight-ivy-filter-string x) x)) spotlight-list)))
-
+(defun spotlight-filter (regex candidates)
+  "Filter spotlight results list of CANDIDATES to match REGEX"
+  (delq nil (mapcar (lambda (x) (and (string-match regex x) x)) candidates)))
 
 ;; Main function
 ;;;###autoload
@@ -109,7 +104,7 @@ your original query."
   (interactive)
 
 
-  (let (spotlight-query spotlight-command spotlight-result)
+  (let (spotlight-query spotlight-command spotlight-result spotlight-list)
     ;;prompt for spotlight query
     (setq spotlight-query (read-from-minibuffer "Spotlight query: "))
 
@@ -127,14 +122,14 @@ your original query."
     ;; split to list
     (setq spotlight-list (split-string spotlight-result "\n"))
 
-    ;;use ivy to narrow
     (let ((ivy-height spotlight-ivy-height))
-      (ivy-read "Filter: " 'spotlight-filter
-                :dynamic-collection t
-                :sort nil
+      (ivy-read "Filter: " spotlight-list
+                :matcher #'spotlight-filter
+                :re-builder #'ivy--regex
                 :action (lambda (x)
                           (find-file x)
                           (swiper spotlight-query))))))
+
 
 
 ;; alternative function with incremental spotlight search but no
