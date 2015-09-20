@@ -4,10 +4,10 @@ Emacs package to search for files using Mac OS X spotlight.
 * Overview
 The functionality is similar to e.g. ~rgrep~ with the advantages that
 
- - The search is quicker as it queries the spotlight database
+ - The search is quicker as it queries the spotlight database.
  - The search can be performed dynamically, updating as the search
    string is changed
- - The list of file names can also be dynamically narrowed by typing a
+ - The list of file names can be dynamically narrowed by typing a
    filter
  - When a file is selected it is opened with a ~swiper~ search running
    with the original search query
@@ -34,6 +34,21 @@ Provides two functions. These are:
      The selected file is then opened and a ~swiper~ search using the
      original query is launched.
 
+* Example
+In the animation below, I run a spotlight search for "tomatoes".
+Notice how the number of matches updates as I type or delete the last
+couple of characters. I then use ~M-f~ to narrow the list of matching
+files using the string "docs org$" which narrows the list to files
+with "doc" in their full name, and with names ending in "org". Finally
+once a select the file, ~swiper~ takes me to the matches of my
+original "tomatoe" query.
+
+[[file:spotlight.gif]]
+
+* Installation
+The best way to install this package is from MELPA using
+~package-list-packages~.
+
 * Customisation
 Customise the variable ~spotlight-min-chars~ to set the minimum
 number of characters that must be entered before the first
@@ -48,6 +63,25 @@ below this directory. Default is user's home directory. Use '/' to
 search everywhere. Alternatively, both ~spotlight~ and
 ~spotlight-fast~ can be called with a prefix argument, in which
 case they will prompt for a base directory.
+
+* Known issues
+ - When a query with multiple words is used, OS X spotlight will
+   return a list of files containing those words anywhere in the body.
+   When one is selected, the ~swiper~ search will search for the query
+   string but will only find matches where all of the words in the
+   query are on the same line in the file.
+
+   In this case, use e.g. ~M-DEL~ to remove words from the ~swiper~
+   string until matches are found.
+
+ - The list of spotlight matches is not updated if the next key
+   results in zero matches.
+
+* Planned improvements
+ - Add customisable lists of file extensions to include or exclude
+   from results.
+ - Add customisable list of preferred order of file extensions used to
+   sort the results.
 
 * Credits
 

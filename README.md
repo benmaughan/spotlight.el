@@ -5,8 +5,12 @@
 <li><a href="#orgheadline1">1. spotlight.el</a></li>
 <li><a href="#orgheadline2">2. Overview</a></li>
 <li><a href="#orgheadline3">3. Functions</a></li>
-<li><a href="#orgheadline4">4. Customisation</a></li>
-<li><a href="#orgheadline5">5. Credits</a></li>
+<li><a href="#orgheadline4">4. Example</a></li>
+<li><a href="#orgheadline5">5. Installation</a></li>
+<li><a href="#orgheadline6">6. Customisation</a></li>
+<li><a href="#orgheadline7">7. Known issues</a></li>
+<li><a href="#orgheadline8">8. Planned improvements</a></li>
+<li><a href="#orgheadline9">9. Credits</a></li>
 </ul>
 </div>
 </div>
@@ -19,10 +23,10 @@ Emacs package to search for files using Mac OS X spotlight.
 
 The functionality is similar to e.g. `rgrep` with the advantages that
 
--   The search is quicker as it queries the spotlight database
+-   The search is quicker as it queries the spotlight database.
 -   The search can be performed dynamically, updating as the search
     string is changed
--   The list of file names can also be dynamically narrowed by typing a
+-   The list of file names can be dynamically narrowed by typing a
     filter
 -   When a file is selected it is opened with a `swiper` search running
     with the original search query
@@ -50,7 +54,24 @@ Provides two functions. These are:
     The selected file is then opened and a `swiper` search using the
     original query is launched.
 
-# Customisation<a id="orgheadline4"></a>
+# Example<a id="orgheadline4"></a>
+
+In the animation below, I run a spotlight search for "tomatoes".
+Notice how the number of matches updates as I type or delete the last
+couple of characters. I then use `M-f` to narrow the list of matching
+files using the string "docs org$" which narrows the list to files
+with "doc" in their full name, and with names ending in "org". Finally
+once a select the file, `swiper` takes me to the matches of my
+original "tomatoe" query.
+
+![img](spotlight.gif)
+
+# Installation<a id="orgheadline5"></a>
+
+The best way to install this package is from MELPA using
+`package-list-packages`.
+
+# Customisation<a id="orgheadline6"></a>
 
 Customise the variable `spotlight-min-chars` to set the minimum
 number of characters that must be entered before the first
@@ -66,7 +87,28 @@ search everywhere. Alternatively, both `spotlight` and
 `spotlight-fast` can be called with a prefix argument, in which
 case they will prompt for a base directory.
 
-# Credits<a id="orgheadline5"></a>
+# Known issues<a id="orgheadline7"></a>
+
+-   When a query with multiple words is used, OS X spotlight will
+    return a list of files containing those words anywhere in the body.
+    When one is selected, the `swiper` search will search for the query
+    string but will only find matches where all of the words in the
+    query are on the same line in the file.
+
+    In this case, use e.g. `M-DEL` to remove words from the `swiper`
+    string until matches are found.
+
+-   The list of spotlight matches is not updated if the next key
+    results in zero matches.
+
+# Planned improvements<a id="orgheadline8"></a>
+
+-   Add customisable lists of file extensions to include or exclude
+    from results.
+-   Add customisable list of preferred order of file extensions used to
+    sort the results.
+
+# Credits<a id="orgheadline9"></a>
 
 Some of the code is based on parts of counsel.el by Oleh Krehel
 at <https://github.com/abo-abo/swiper>
