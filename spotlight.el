@@ -50,7 +50,7 @@
 ;; `spotlight-min-chars' to a lower number will result in more matches
 ;; and can lead to slow performance.
 ;;
-;; Customise the variable `spotlight-base-dir' to specify the default
+;; Customise the variable `spotlight-default-base-dir' to specify the default
 ;; base directory for the spotlight search for both `spotlight' and
 ;; `spotlight-live'. The spotlight database will be queried for files
 ;; below this directory. Default is user's home directory. Use '/' to
@@ -79,30 +79,40 @@
   :group 'external
   :prefix "spotlight-")
 
-(defcustom spotlight-base-dir "~"
+(defcustom spotlight-default-base-dir "~"
   "Search spotlight database for files below this directory.  Default is user's home directory.  Use '/' to search everywhere."
+  :group 'external
   :type 'string)
 
 (defcustom spotlight-min-chars 5
   "Minimum number of characters required before running spotlight search in `spotlight' and `spotlight-live'.  After this many characters have been entered, the search is updated with each new character.  Setting `spotlight-min-chars' to a lower number will result in more matches and can lead to slow performance."
+  :group 'external
   :type 'integer)
 
 (defcustom spotlight-ivy-height 20
   "Height in characters of minibuffer displaying search results."
+  :group 'external
   :type 'integer)
 
 (defvar spotlight-user-base-dir nil
-  "String containing base directory for spotlight search.  May be used to override `spotlight-base-dir'.")
+  "String containing base directory for spotlight search.  May be used to override `spotlight-default-base-dir'.")
 
 (defvar spotlight-file-filter-flag nil
   "Flag to record if filename filtering is requested.")
 
-;;add key to ivy keymap to launch filename filter
-(define-key ivy-minibuffer-map (kbd "M-f")
-  (lambda () (interactive)
-    (setq spotlight-file-filter-flag t)
-    (ivy-done)))
 
+;; function to break out of spotlight and filter on filename
+(defun spotlight-launch-file-filter ()
+  ""
+  (interactive)
+  (setq spotlight-file-filter-flag t)
+  (ivy-done))
+
+;; create keymap
+(defvar spotlight-map nil
+  "Keymap for spotlight.")
+(setq spotlight-map (make-sparse-keymap))
+(define-key spotlight-map (kbd "M-f") 'spotlight-launch-file-filter)
 
 ;; Function to be called by ivy to filter the spotlight file list
 (defun spotlight-filter (regex candidates)
@@ -124,15 +134,15 @@ jump straight to the filename filter.
 
 If used with a prefix argument then it will prompt the user for a
 base directory to search below, otherwise it will use
-`spotlight-base-dir' as the base directory."
+`spotlight-default-base-dir' as the base directory."
   (interactive "P")
 
   ;;see if prefix arg was used
-  (if arg
-      ;; prompt for dir
-      (setq spotlight-user-base-dir (read-directory-name "base directory: "))
-    ;; else use default
-    (setq spotlight-user-base-dir spotlight-base-dir))
+  (setq spotlight-user-base-dir (if arg
+                                    ;;prompt for dir
+                                    (read-directory-name "base directory: ")
+                                  ;;else use default
+                                  spotlight-default-base-dir))
 
   ;;run query
   (let (spotlight-query spotlight-command spotlight-result spotlight-list)
@@ -146,7 +156,7 @@ base directory to search below, otherwise it will use
     ;;set up command
     (setq spotlight-command (concat "mdfind -onlyin "
                                     (shell-quote-argument
-                                     (expand-file-name spotlight-base-dir))
+                                     (expand-file-name spotlight-default-base-dir))
                                     " "
                                     spotlight-query))
 
@@ -177,7 +187,7 @@ base directory to search below, otherwise it will use
              (shell-quote-argument
               (expand-file-name spotlight-user-base-dir))
              " "
-             string))
+             (shell-quote-argument string)))
     nil))
 
 ;; Function to run the ivy filter in the file list
@@ -192,7 +202,7 @@ base directory to search below, otherwise it will use
                                     (shell-quote-argument
                                      (expand-file-name dir))
                                     " "
-                                    query))
+                                    (shell-quote-argument query)))
 
     ;; capture to string
     (setq spotlight-result (shell-command-to-string spotlight-command))
@@ -231,26 +241,27 @@ Use <M-f> to filter the list of matching files by filename.
 
 If used with a prefix argument then it will prompt the user for a
 base directory to search below, otherwise it will use
-`spotlight-base-dir' as the base directory."
+`spotlight-default-base-dir' as the base directory."
   (interactive "P")
   (let ((ivy-height spotlight-ivy-height))
     ;;see if prefix arg was used
-    (if arg
-        ;; prompt for dir
-        (setq spotlight-user-base-dir (read-directory-name "base directory: "))
-      ;; else use default
-      (setq spotlight-user-base-dir spotlight-base-dir))
+    (setq spotlight-user-base-dir (if arg
+                                      ;;prompt for dir
+                                      (read-directory-name "base directory: ")
+                                    ;;else use default
+                                    spotlight-default-base-dir))
 
-    ;;run query
+    ;;run query with ivy
     (ivy-read "spotlight query: " 'ivy-mdfind-function
               :initial-input initial-input
               :dynamic-collection t
+              :keymap spotlight-map
               :action (lambda (x)
                         (if spotlight-file-filter-flag
                             ;;run filename filter
                             (progn (setq spotlight-file-filter-flag nil)
                                    (spotlight-file-select spotlight-user-base-dir ivy-text))
-                          ;; open file
+                          ;;else open file
                           (progn (setq spotlight-file-filter-flag nil)
                                  (find-file x)
                                  (swiper ivy-text)))))))
