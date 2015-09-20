@@ -40,7 +40,7 @@ Notice how the number of matches updates as I type or delete the last
 couple of characters. I then use ~M-f~ to narrow the list of matching
 files using the string "docs org$" which narrows the list to files
 with "doc" in their full name, and with names ending in "org". Finally
-once a select the file, ~swiper~ takes me to the matches of my
+once I select the file I want, ~swiper~ takes me to the matches of my
 original "tomatoe" query.
 
 [[file:spotlight.gif]]
@@ -65,6 +65,10 @@ search everywhere. Alternatively, both ~spotlight~ and
 case they will prompt for a base directory.
 
 * Known issues
+ - ~spotlight~ is slow for queries resulting in large numbers of
+   matches, taking 5-10 seconds for the initial update.
+   ~spotlight-fast~ is much faster.
+
  - When a query with multiple words is used, OS X spotlight will
    return a list of files containing those words anywhere in the body.
    When one is selected, the ~swiper~ search will search for the query
