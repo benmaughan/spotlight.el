@@ -23,7 +23,7 @@ Emacs package to search for files using Mac OS X spotlight.
 
 The functionality is similar to e.g. `rgrep` with the advantages that
 
--   The search is quicker as it queries the spotlight database.
+-   The search can be quicker as it queries the spotlight database.
 -   The search can be performed dynamically, updating as the search
     string is changed
 -   The list of file names can be dynamically narrowed by typing a
@@ -107,6 +107,7 @@ case they will prompt for a base directory.
 
 # Planned improvements<a id="orgheadline8"></a>
 
+-   Speed up `spotlight`.
 -   Add customisable lists of file extensions to include or exclude
     from results.
 -   Add customisable list of preferred order of file extensions used to
