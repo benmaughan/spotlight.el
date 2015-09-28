@@ -4,7 +4,7 @@ Emacs package to search for files using Mac OS X spotlight.
 * Overview
 The functionality is similar to e.g. ~rgrep~ with the advantages that
 
- - The search can be quicker as it queries the spotlight database.
+ - The search is quicker as it queries the spotlight database.
  - The search can be performed dynamically, updating as the search
    string is changed
  - The list of file names can be dynamically narrowed by typing a
@@ -21,13 +21,13 @@ Provides two functions. These are:
      file will launch ~swiper~ for that file searching for the query
      string.
 
-     Alternatively, the user can use ~M-f~ to dynamically filter the
+     Alternatively, the user can use ~M-RET~ to dynamically filter the
      list of matching files to reduce the number of matches before
      selecting a file.
 
   2) ~spotlight-fast~ is the same as ~spotlight~ but the user is
      prompted for a query string to search the spotlight database
-     without incremental updates. This can be much faster than
+     without incremental updates. This can be faster than
      ~spotlight~. The list of matching files containing the query string
      in their bodies are presented and the user can select the file or
      type a string to dynamically filter the list of files by filename.
@@ -37,7 +37,7 @@ Provides two functions. These are:
 * Example
 In the animation below, I run a spotlight search for "tomatoes".
 Notice how the number of matches updates as I type or delete the last
-couple of characters. I then use ~M-f~ to narrow the list of matching
+couple of characters. I then use ~M-RET~ to narrow the list of matching
 files using the string "docs org$" which narrows the list to files
 with "doc" in their full name, and with names ending in "org". Finally
 once I select the file I want, ~swiper~ takes me to the matches of my
@@ -54,7 +54,7 @@ Customise the variable ~spotlight-min-chars~ to set the minimum
 number of characters that must be entered before the first
 spotlight search is performed in ~spotlight~. Setting
 ~spotlight-min-chars~ to a lower number will result in more matches
-and can lead to slow performance.
+and can lead to slower performance.
 
 Customise the variable ~spotlight-base-dir~ to specify the default
 base directory for the spotlight search for both ~spotlight~ and
@@ -67,7 +67,10 @@ case they will prompt for a base directory.
 * Known issues
  - ~spotlight~ is slow for queries resulting in large numbers of
    matches, taking 5-10 seconds for the initial update.
-   ~spotlight-fast~ is much faster.
+   This is [[https://www.reddit.com/r/emacs/comments/3m97if/big_delays_when_running_a_shell_command/][apparently a bug in Emacs on OS X]] and the work around is to
+   write the spotlight results to a temporary file and then read that
+   back into a buffer. The temp file can be configured with
+   ~spotlight-tmp-file~, which defaults to =~/.emacs-spotlight-tmp-file=.
 
  - When a query with multiple words is used, OS X spotlight will
    return a list of files containing those words anywhere in the body.
@@ -78,11 +81,7 @@ case they will prompt for a base directory.
    In this case, use e.g. ~M-DEL~ to remove words from the ~swiper~
    string until matches are found.
 
- - The list of spotlight matches is not updated if the next key
-   results in zero matches.
-
-* Planned improvements
- - Speed up ~spotlight~.
+* Planned improvements                                             :noexport:
  - Add customisable lists of file extensions to include or exclude
    from results.
  - Add customisable list of preferred order of file extensions used to
