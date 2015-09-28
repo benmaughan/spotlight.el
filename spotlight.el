@@ -137,7 +137,7 @@
 ;; spotlight functions                                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Function to be called by ivy
+;; Function to be called by ivy to run mdfind
 (defun ivy-mdfind-function (string &rest _unused)
   "Issue mdfind for STRING."
   (if (< (length string) spotlight-min-chars)
@@ -150,7 +150,7 @@
              (shell-quote-argument string)
              " > "
              (expand-file-name spotlight-tmp-file)))
-    nil))
+    '("" "working...")))
 
 ;; Modified version of counsel--async-command from counsel.el
 (defun spotlight-async-command (cmd)
@@ -179,9 +179,12 @@
           (progn
             (with-current-buffer (process-buffer process)
               (insert-file-contents spotlight-tmp-file)
-              (setq ivy--all-candidates
+              ;; check if no matches
+              (if (= (buffer-size (process-buffer process)) 0)
+                  (setq ivy--all-candidates '("No matches"))
+                  (setq ivy--all-candidates
                     (ivy--sort-maybe
-                     (split-string (buffer-string) "\n" t)))
+                     (split-string (buffer-string) "\n" t))))
               (setq ivy--old-cands ivy--all-candidates))
             (ivy--exhibit))
         (progn
