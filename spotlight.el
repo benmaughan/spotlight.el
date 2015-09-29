@@ -216,50 +216,6 @@
                           (find-file x)
                           (swiper query))))))
 
-
-;; Spotlight function
-;;;###autoload
-(defun spotlight (arg &optional initial-input)
-  "Search for a string ARG in the spotlight database.
-
-Uses `ivy-read' to perform dynamic updates for each new character
-entered.  You'll be given a list of files that match.  Selecting a
-file will launch `swiper' for that file to search it for your
-query string.  INITIAL-INPUT can be given as the initial
-minibuffer input.  Customise the variable `spotlight-min-chars' to
-set the minimum number of characters that must be entered before
-the first spotlight search is performed.  Setting
-`spotlight-min-chars' to a lower number will result in more
-matches and can lead to slow performance.
-
-Use \\<spotlight-map> \\[spotlight-launch-file-filter] to filter the list of matching files by
-filename.  If used with a prefix argument then it will prompt the
-user for a base directory to search below, otherwise it will use
-`spotlight-default-base-dir' as the base directory."
-  (interactive "P")
-  (let ((ivy-height spotlight-ivy-height))
-    ;;see if prefix arg was used
-    (setq spotlight-user-base-dir (if arg
-                                      ;;prompt for dir
-                                      (read-directory-name "base directory: ")
-                                    ;;else use default
-                                    spotlight-default-base-dir))
-
-    ;;run query with ivy
-    (ivy-read "spotlight query: " 'ivy-mdfind-function
-              :initial-input initial-input
-              :dynamic-collection t
-              :keymap spotlight-map
-              :action (lambda (x)
-                        (if spotlight-file-filter-flag
-                            ;;run filename filter
-                            (progn (setq spotlight-file-filter-flag nil)
-                                   (spotlight-file-select spotlight-user-base-dir ivy-text))
-                          ;;else open file
-                          (progn (setq spotlight-file-filter-flag nil)
-                                 (find-file x)
-                                 (swiper ivy-text)))))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; main spotlight function                                                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
