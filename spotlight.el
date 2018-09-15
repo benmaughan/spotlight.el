@@ -138,10 +138,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Function to be called by ivy to run mdfind
-(defun ivy-mdfind-function (string &rest _unused)
+(defun ivy-mdfind-function (&optional string &rest _unused)
   "Issue mdfind for STRING."
+  (if (not (boundp 'string)) (setq string ""))
   (if (< (length string) spotlight-min-chars)
-      (counsel-more-chars spotlight-min-chars)
+      (counsel-more-chars)
     (spotlight-async-command
      (concat "mdfind -onlyin "
              (shell-quote-argument
