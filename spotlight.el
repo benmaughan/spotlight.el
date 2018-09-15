@@ -140,7 +140,6 @@
 ;; Function to be called by ivy to run mdfind
 (defun ivy-mdfind-function (&optional string &rest _unused)
   "Issue mdfind for STRING."
-  (if (not (boundp 'string)) (setq string ""))
   (if (< (length string) spotlight-min-chars)
       (counsel-more-chars)
     (spotlight-async-command
